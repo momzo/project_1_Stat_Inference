@@ -1,0 +1,137 @@
+---
+output: html_document
+---
+title:"Exponentials"
+author: "issa fall"
+date: "September 7, 2015"
+```
+  keep_md:true
+```
+
+
+          DISTRIBUTION OF THE MEANS OF 40 EXPONENTIALS
+          
+INTRODUCTION
+
+We investigate the distribution of exponentials in R and compare it with the central limit
+theorem.
+The mean is 1/lambda
+The standard deviation is also 1/lambda set to 0.2 for all the simulations.
+It investigates the distribution of average of 40 exponentials.
+
+##                                           SIMULATIONS
+##Lambda
+```{r lambda,echo=TRUE}
+lambda =0.2
+```
+##Number of exponentials
+```{r 40 exponentials,echo=TRUE}
+n =40
+```
+##Number of simulations
+```{r 1000 simulations to run,echo=TRUE}
+nsims =1:1000
+```
+##Set the seed
+```{r set a seed to reproduce the data,echo=TRUE}
+set.seed(820)
+means<-data.frame(x =sapply(nsims, function(x){
+                      mean(rexp(n,lambda))}))
+head(means)
+```
+##The sample mean
+```{r sample mean,echo=TRUE}
+mean(means$x)
+```
+##Confidence intervals
+```{r confidence intervals ,echo=TRUE}
+quantile(mean(means$x), c(0.025, 0.975))
+```
+##The theoretical mean
+```{r theoretical mean,echo=TRUE}
+1/lambda
+```
+##CONCLUSION
+
+The sample mean and the theoretical mean are almost the same.
+
+##The sample variance
+```{r sample variance,echo=TRUE}
+var(means$x)
+```
+##Confidence interval
+```{r confidence intervals,echo=TRUE}
+quantile(var(means$x), c(0.025, 0.975))
+```
+##Theoretical variance
+```{r,echo=TRUE}
+((1/lambda)/sqrt(40))^2
+```
+The variance of the sample and the theoretical variance are almost the same.
+Let's show that the distribution is approimately normal.
+##Let's upload ggplot2
+```{r histogram,echo=TRUE}
+library(ggplot2)
+ggplot(data = means,aes(x = means))+geom_histogram(color ="black",fill ="lightblue",binwidth = 0.05)
+```
+
+
+##Loading Tooth Growth
+```{r loading,echo=TRUE}
+library(datasets)
+data("ToothGrowth")
+names(ToothGrowth)
+head(ToothGrowth)
+tail(ToothGrowth)
+str(ToothGrowth)
+summary(ToothGrowth)
+with(ToothGrowth,plot(dose,len))
+with(subset(ToothGrowth, supp =="OJ"),points(dose,len, col ="blue"))
+boxplot(len ~ supp,ToothGrowth,xlab ="supp",ylab ="len", main = "ToothGrowth")
+fit<-lm(len ~., data = ToothGrowth)
+summary(fit)$coef
+table(ToothGrowth$supp)
+oj<-subset(ToothGrowth, supp == "OJ")
+head(oj)
+hist(oj$len, col = "red")
+vc<-subset(ToothGrowth, supp == "VC")
+head(vc)
+hist(vc$len, col = "red")
+qq<-qplot(dose, len, colour = supp, data = ToothGrowth)
+qq + geom_smooth(method = "lm", formula = y ~ x)
+```
+
+
+##Bootstrapping the statistics(dose) at a 95% CI
+```{r bootstrapping,echo=TRUE}
+library(boot)
+```
+##Function to obtain regression coef
+```{r,echo=TRUE}
+bs<-function(formula, data, indices){
+  
+  d<-data[indices, ] # allow boot to select sample
+  
+  fit<-lm(formula, data = d)
+  return(coef(fit))
+}
+```
+##Bootstrapping with 1000 replications
+```{r replications, echo=TRUE}
+results<-boot(data = ToothGrowth, statistic = bs, R = 1000, formula = len ~.)
+```
+##View results
+```{r results,echo=TRUE}
+plot(results, index =1) # intercept
+plot(results, index =2) #
+plot(results, index =3)
+```
+
+
+##Get the 95% CI
+```{r,echo=TRUE}
+boot.ci(results, type = "bca", index = 1)
+boot.ci(results, type = "bca", index = 2)
+boot.ci(results, type = "bca", index = 3)
+
+
