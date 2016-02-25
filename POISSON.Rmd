@@ -1,0 +1,52 @@
+---
+title: "Prob.Mass Function(POISSON)"
+author: "issa fall"
+date: "September 8, 2015"
+output: html_document
+---
+SIMULATION OF THE POISSON DISTRIBUTION
+
+
+## calculation of the mean
+```{r,echo=TRUE}
+lambda = 10
+n =5
+set.seed(1)
+nsims =1000
+
+means<-data.frame(x=sapply(nsims, function(x){
+                  mean(rpois(n,lambda))}))
+head(means)
+```
+
+
+THE POISSON PROBABILITY MASS FUNCTION
+
+## x~Poisson(t*lambda) if t-> infinity.
+
+## p(X = x) = (t*lambda)^x*exp(-t*lambda)/x!
+
+## for x = 0,1,...
+
+## the mean of the poisson is E[X] = t*lambda  thus  E[X/t] = lambda.
+
+## the variance of the poisson is Var(X) = t*lambda
+
+## the poisson tends to a normal as ( t*lambda ) get large.
+
+```{r,echo=TRUE}
+par(mfrow = c(1,3))
+plot(0:10,dpois(0:10,lambda = 2),type = "h",frame = FALSE)
+plot(0:20,dpois(0:20,lambda = 10),type = "h",frame = FALSE)
+plot(0:200,dpois(0:200,lambda = 100),type = "h",frame = FALSE)
+```
+
+## Showing that mean and the variance are equal
+
+```{r,echo=TRUE}
+x<-0:10000
+lambda = 3
+mu<-sum(x*dpois(x,lambda = lambda))
+sigmasq<-sum(x-mu)^2*dpois(x,lambda = lambda)
+head(c(mu,sigmasq))
+```
