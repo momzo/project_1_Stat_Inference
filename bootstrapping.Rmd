@@ -1,0 +1,60 @@
+---
+title: "Bootstrapping"
+author: "issa fall"
+date: "November 14, 2015"
+output: html_document
+---
+##loading data
+```{r loading,echo=TRUE}
+library(datasets)
+data("mtcars")
+str(mtcars)
+summary(mtcars)
+```
+##bootstrapping a sigle statistic(k = 1)
+The following generate the bootstrapped 95% CI for R-squared in the linear regression of miles per gallon(mpg)
+on car weight(wt) and displacement(disp).The data source is mtcars.The bootstrapped confidence interval is 
+based on 1000 replications.
+```{r single statistic,echo=TRUE}
+library(boot)
+rsq<-function(formula, data, indices){
+  d<-data[indices, ] # Allows boot to select sample
+  fit<-lm(formula,data = d)
+  return(summary(fit)$r.square) # Function to obtain R-square from data
+  
+}
+
+results<-boot(data = mtcars,statistic = rsq, R = 1000, formula = mpg ~  wt+disp) # bootstrapping with 1000 replications
+results
+plot(results) # View results
+boot.ci(results, type = "bca") # Get 95% CI
+```
+
+##bootstrapping several statistics(k > 1):bootstrap 95% CI for regression coefficients
+```{r bootsrapping,echo=TRUE}
+library(boot)
+#Function to obtain regression weights
+bs<-function(formula,data,indices){
+  
+  d<-data[indices, ]  #allows boot select sample
+  
+  fit<-lm(formula, data = d)
+  
+  return(coef(fit))
+}
+```
+##View results
+```{r results,echo=TRUE}
+results<-boot(data = mtcars, statistic = bs, R = 1000, formula = mpg ~ wt+disp)
+results
+plot(results, indices =1) # intercept
+plot(results, indices =2) # wt
+plot(results, indices =3) # disp
+```
+##get 95% confidence intervals
+```{r confidence interval,echo=TRUE}
+boot.ci(results, type = "bca", index = 1) # intercept
+boot.ci(results, type = "bca", index = 2) # wt
+boot.ci(results, type = "bca", index = 3) # disp
+```
+
